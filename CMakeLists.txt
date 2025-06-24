@@ -2,9 +2,16 @@
 cmake_minimum_required(VERSION 3.20)
 project(IfcOpenShellWrapper)
 
-set(CONAN_OUT_CMAKE_FILE ${CMAKE_SOURCE_DIR}/build/generators/conan_toolchain.cmake)
-if (EXISTS ${CMAKE_SOURCE_DIR}/conanfile.py AND EXISTS ${CONAN_OUT_CMAKE_FILE})
-    include(${CONAN_OUT_CMAKE_FILE})
+if (EXISTS ${CMAKE_SOURCE_DIR}/conanfile.py)
+    execute_process(
+        COMMAND conan install ${CMAKE_SOURCE_DIR} --output=${CMAKE_SOURCE_DIR}/build/generators --build=never -r=fscut-conan-center --update
+        RESULT_VARIABLE result
+    )
+    if(result)
+        message(FATAL_ERROR "Failed to execute conan install command")
+    endif()
+
+    include(${CMAKE_SOURCE_DIR}/build/generators/conan_toolchain.cmake)
 endif()
 
 # 代理跳转到实际主项目

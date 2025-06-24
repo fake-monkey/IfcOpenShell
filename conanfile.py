@@ -16,7 +16,3 @@ class IFCOpenShellRecipe(ConanFile):
         tc = CMakeToolchain(self)
         tc.user_presets_path = None  # prevent CMakeUserPresets.json from being generated
         tc.generate()
-
-    def layout(self):
-        self.folders.build = "build"  # 所有构建都在 build/ 下
-        self.folders.generators = "build/generators"
