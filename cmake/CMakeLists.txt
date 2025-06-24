@@ -300,7 +300,7 @@ endif(USD_SUPPORT)
 # Find Boost: On win32 the (hardcoded) default is to use static libraries and
 # runtime, when doing running conda-build we pick what conda prepared for us.
 if(WIN32 AND("$ENV{CONDA_BUILD}" STREQUAL ""))
-    set(Boost_USE_STATIC_LIBS ON)
+    set(Boost_USE_STATIC_LIBS OFF)
     set(Boost_USE_STATIC_RUNTIME OFF)
     set(Boost_USE_MULTITHREADED ON)
 
