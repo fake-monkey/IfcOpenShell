@@ -14,5 +14,12 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/conanfile.py)
     include(${CMAKE_SOURCE_DIR}/build/generators/conan_toolchain.cmake)
 endif()
 
+find_package(OpenCASCADE CONFIG REQUIRED)
+set (OCC_INCLUDE_DIR ${OpenCASCADE_INCLUDE_DIR})
+set (OCC_LIBRARY_DIR ${OpenCASCADE_LIBRARY_DIR})
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    set (OCC_LIBRARY_DIR ${OCC_LIBRARY_DIR}d)
+endif()
+
 # 代理跳转到实际主项目
 add_subdirectory(cmake)
