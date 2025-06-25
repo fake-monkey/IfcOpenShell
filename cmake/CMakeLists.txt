@@ -459,7 +459,7 @@ if(BUILD_IFCGEOM)
 
     if(MSVC)
         add_definitions(-DHAVE_NO_DLL)
-        add_debug_variants(OPENCASCADE_LIBRARIES "${OPENCASCADE_LIBRARIES}" d)
+        # add_debug_variants(OPENCASCADE_LIBRARIES "${OPENCASCADE_LIBRARIES}" d)
     endif()
 
     if(WIN32)
@@ -1053,6 +1053,8 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
 
 endif(BUILD_CONVERT OR BUILD_IFCPYTHON)
 
+include (dll_replicator.cmake)
+
 if(BUILD_CONVERT)
     if(WITH_CGAL AND CITYJSON_SUPPORT)
         message(STATUS "Building CityJSON support")
@@ -1117,6 +1119,8 @@ if(BUILD_CONVERT)
         LIBRARY DESTINATION ${LIBDIR}
         RUNTIME DESTINATION ${BINDIR}
     )
+
+    auto_copy_dll(IfcConvert)
 endif(BUILD_CONVERT)
 
 # IfcGeomServer
