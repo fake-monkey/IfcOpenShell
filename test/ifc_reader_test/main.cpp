@@ -18,12 +18,18 @@ enum class IfcParseError {
     kIfcIteratorInitializationFailed,
 };
 
+static std::string get_native_string(const std::filesystem::path& a_path) {
+    auto u8str = a_path.u8string();
+    return std::string(reinterpret_cast<const char*>(u8str.data()), u8str.size());
+}
+
 BOOST_OUTCOME_V2_NAMESPACE::result<std::vector<TopoDS_Shape>, IfcParseError, BOOST_OUTCOME_V2_NAMESPACE::policy::terminate> ReadIFCShapes(const std::filesystem::path& a_path, int a_num_threads, const std::set<std::string>& a_exclude_entities) {
     using namespace ifcopenshell;
     using namespace ifcopenshell::geometry;
     using namespace boost;
 
-    std::unique_ptr<IfcParse::IfcFile> ifc_file = std::make_unique<IfcParse::IfcFile>(a_path.string());
+    auto u8str = get_native_string(a_path);
+    std::unique_ptr<IfcParse::IfcFile> ifc_file = std::make_unique<IfcParse::IfcFile>(u8str);
     if (!(bool)ifc_file || !ifc_file->good()) {
         return outcome_v2::failure(IfcParseError::kIfcInitializationFailed);
     }
