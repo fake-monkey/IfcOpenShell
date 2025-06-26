@@ -21,8 +21,14 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set (OCC_LIBRARY_DIR ${OCC_LIBRARY_DIR}d)
 endif()
 
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 find_package(Eigen3 CONFIG REQUIRED)
 set (EIGEN_DIR ${EIGEN3_INCLUDE_DIR})
 
 # 代理跳转到实际主项目
 add_subdirectory(cmake)
+
+include(cmake/target_common.cmake)
+
+add_subdirectory(test/ifc_reader_test)
