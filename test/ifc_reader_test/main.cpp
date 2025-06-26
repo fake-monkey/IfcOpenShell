@@ -1,14 +1,17 @@
-#include "../ifcgeom/Iterator.h"
-#include "../ifcgeom/kernels/opencascade/OpenCascadeConversionResult.h"
-#include "../ifcparse/IfcFile.h"
-
-#include <boost/outcome.hpp>
 #include <filesystem>
 #include <thread>
+#include <vector>
+#include <format>
+
+#include <boost/outcome.hpp>
+
 #include <TopoDS_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopoDS_Shape.hxx>
-#include <vector>
+
+#include "../ifcgeom/Iterator.h"
+#include "../ifcgeom/kernels/opencascade/OpenCascadeConversionResult.h"
+#include "../ifcparse/IfcFile.h"
 
 enum class IfcParseError {
     kIfcInitializationFailed,
@@ -80,10 +83,10 @@ int main() {
     std::locale::global(std::locale("zh_CN.UTF-8"));
 
     filesystem::path ifc_dir = LR"(D:\works\tasks\BUGFIX#78415-ifc导入无翼板腹板)";
-    const char* p = R"(D:\works\tasks\BUGFIX#78415-ifc导入无翼板腹板)";
-    auto to_str = ifc_dir.string();
-    auto u8_str = ifc_dir.u8string();
-    filesystem::path ifc_path = ifc_dir / "3-21.ifc";
+    ifc_dir = LR"(D:\works\tasks\BUGFIX#96486-ifc导入模型错误)";
+    std::string file_name = "3-21";
+    file_name = "G5025(3)";
+    filesystem::path ifc_path = ifc_dir / (file_name + ".ifc");
     uint32_t n = std::thread::hardware_concurrency();
     if (n == 0) {
         n = 1;
@@ -98,7 +101,7 @@ int main() {
             builder.Add(compound, shape);
         }
 
-        filesystem::path out_path = ifc_dir / "3-21_debug.brep";
+        filesystem::path out_path = ifc_dir / std::format("{}_debug.brep", file_name);
         std::ofstream out_file(out_path);
         BRepTools::Write(compound, out_file);
     }
