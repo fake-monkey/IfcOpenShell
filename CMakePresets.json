@@ -10,7 +10,7 @@
                 "strategy": "external"
             },
           "cacheVariables": {
-            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/install",
+            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/package",
             "CMAKE_GENERATOR": "Visual Studio 17 2022",
             "CMAKE_GENERATOR_PLATFORM": "x64",
             "MINIMAL_BUILD": "ON",
