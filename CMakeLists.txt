@@ -2,9 +2,10 @@
 cmake_minimum_required(VERSION 3.20)
 project(IfcOpenShellWrapper)
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/conanfile.py)
+set (CONAN_FILE_DIR ${CMAKE_SOURCE_DIR}/conan_file)
+if (EXISTS ${CONAN_FILE_DIR}/conanfile.py)
     execute_process(
-        COMMAND conan install ${CMAKE_SOURCE_DIR} --output=${CMAKE_SOURCE_DIR}/build/generators --build=never -r=fscut-conan-center --update
+        COMMAND conan install ${CONAN_FILE_DIR} --output=${CMAKE_SOURCE_DIR}/build/generators --build=never -r=fscut-conan-center --update
         RESULT_VARIABLE result
     )
     if(result)
