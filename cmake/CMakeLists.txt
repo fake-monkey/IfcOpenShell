@@ -311,7 +311,7 @@ if(WIN32 AND("$ENV{CONDA_BUILD}" STREQUAL ""))
         add_definitions(-DBOOST_ALL_NO_LIB)
 
         # Necessary for boost version >= 1.67
-        set(BCRYPT_LIBRARIES "bcrypt.lib")
+        set(BCRYPT_LIBRARIES "bcrypt")
     endif()
 else()
     # Disable Boost's autolinking as the libraries to be linked to are supplied
@@ -321,7 +321,7 @@ else()
 
     if(WIN32)
         # Necessary for boost version >= 1.67
-        set(BCRYPT_LIBRARIES "bcrypt.lib")
+        set(BCRYPT_LIBRARIES "bcrypt")
     endif()
 endif()
 
@@ -452,9 +452,10 @@ if(BUILD_IFCGEOM)
     # TODO Extract this into macro/function
     foreach(lib ${OPENCASCADE_LIBRARY_NAMES})
         # Make sure we'll handle the Windows/MSVC debug postfix convention too.
-        string(REPLACE TKerneld "${lib}" lib_path "${libTKernel}")
-        string(REPLACE TKernel "${lib}" lib_path "${lib_path}")
-        list(APPEND OPENCASCADE_LIBRARIES "${lib_path}")
+        # 完全用 target 管理依赖。
+        # string(REPLACE TKerneld "${lib}" lib_path "${libTKernel}")
+        # string(REPLACE TKernel "${lib}" lib_path "${lib_path}")
+        list(APPEND OPENCASCADE_LIBRARIES "${lib}")
     endforeach()
 
     if(MSVC)
@@ -464,7 +465,7 @@ if(BUILD_IFCGEOM)
 
     if(WIN32)
         # OCC might require linking to Winsock depending on the version and build configuration
-        list(APPEND OPENCASCADE_LIBRARIES ws2_32.lib)
+        list(APPEND OPENCASCADE_LIBRARIES ws2_32)
     endif()
 
     # Make sure cross-referenced symbols between static OCC libraries get
