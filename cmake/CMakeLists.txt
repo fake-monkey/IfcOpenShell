@@ -968,12 +968,12 @@ if(BUILD_IFCGEOM)
         file(GLOB IFCGEOM_CPP_FILES ../src/ifcgeom/kernels/${kernel}/*.cpp)
         set(IFCGEOM_FILES ${IFCGEOM_CPP_FILES} ${IFCGEOM_H_FILES})
         
-        add_library(geometry_kernel_${kernel} ${IFCGEOM_FILES})
+        add_library(geometry_kernel_${kernel} STATIC ${IFCGEOM_FILES})
         set_property(TARGET geometry_kernel_${kernel} APPEND PROPERTY COMPILE_FLAGS "-DIFC_GEOM_EXPORTS")
         # needed?
         # if(NOT WASM_BUILD)
         # endif()
-        target_link_libraries(geometry_kernel_${kernel} ${${KERNEL_UPPER}_LIBRARIES})
+        target_link_libraries(geometry_kernel_${kernel} ${${KERNEL_UPPER}_LIBRARIES} IfcParse)
         list(APPEND kernel_libraries geometry_kernel_${kernel})
         
         if(${kernel} STREQUAL "cgal")

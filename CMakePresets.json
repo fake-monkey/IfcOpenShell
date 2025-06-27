@@ -14,7 +14,6 @@
             "CMAKE_GENERATOR": "Visual Studio 17 2022",
             "CMAKE_GENERATOR_PLATFORM": "x64",
             "MINIMAL_BUILD": "ON",
-            "BUILD_SHARED_LIBS": "ON",
             "BUILD_EXAMPLES": "OFF",
             "WITH_CGAL": "OFF",
             "COLLADA_SUPPORT": "OFF",
