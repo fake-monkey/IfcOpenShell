@@ -30,7 +30,23 @@ set (EIGEN_DIR ${EIGEN3_INCLUDE_DIR})
 # 代理跳转到实际主项目
 add_subdirectory(cmake)
 
-install(EXPORT IfcOpenShell DESTINATION cmake NAMESPACE IfcOpenShell::)
+install(EXPORT IfcOpenShell
+    DESTINATION cmake
+    FILE IfcOpenShellTargets.cmake
+    NAMESPACE IfcOpenShell::
+)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    "${CMAKE_SOURCE_DIR}/cmake/IfcOpenShellConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/IfcOpenShellConfig.cmake"
+    INSTALL_DESTINATION cmake
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/IfcOpenShellConfig.cmake"
+    DESTINATION cmake
+)
 
 include(cmake/target_common.cmake)
 

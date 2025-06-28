@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# 查找依赖
+find_dependency(Eigen3 CONFIG REQUIRED)
+find_dependency(OpenCASCADE CONFIG REQUIRED)
+
+# 引入Targets
+include("${CMAKE_CURRENT_LIST_DIR}/IfcOpenShellTargets.cmake")
