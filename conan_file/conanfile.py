@@ -3,6 +3,7 @@ from conan.tools import cmake
 from conan.tools.cmake import CMakeToolchain
 from os import path
 from pathlib import Path
+import shutil
 
 class IFCOpenShellRecipe(ConanFile):
     name = "ifcopenshell"
