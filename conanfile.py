@@ -3,7 +3,7 @@ from conan.tools import cmake
 from conan.tools.cmake import CMakeToolchain
 from os import path
 from pathlib import Path
-import shutil
+from conan.tools import files
 
 class IFCOpenShellRecipe(ConanFile):
     name = "ifcopenshell"
@@ -29,12 +29,7 @@ class IFCOpenShellRecipe(ConanFile):
         tc.generate()
         
     def package(self):
-        src_dir = Path(self.source_folder) / "build" / "package"
-        target_dir = self.package_folder
-        if path.exists(target_dir):
-            shutil.rmtree(target_dir)
-        shutil.copytree(src_dir, target_dir)
-        print(f"{src_dir} -> {target_dir}")
+        files.copy(self, "*", self.source_folder, self.package_folder, keep_path=True)
 
     def package_info(self):
         self.cpp_info.builddirs = ["cmake"]
