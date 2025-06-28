@@ -9,7 +9,7 @@ class IFCOpenShellRecipe(ConanFile):
     name = "ifcopenshell"
     version = "0.8.2"
     user = "third_party"
-    channel = "develop"
+    channel = "stable"
 
     settings = "os", "arch"
 
