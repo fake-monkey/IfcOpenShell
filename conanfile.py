@@ -29,7 +29,7 @@ class IFCOpenShellRecipe(ConanFile):
         tc.generate()
         
     def package(self):
-        src_dir = Path(self.source_folder).parent / "build" / "package"
+        src_dir = Path(self.source_folder) / "build" / "package"
         target_dir = self.package_folder
         if path.exists(target_dir):
             shutil.rmtree(target_dir)
