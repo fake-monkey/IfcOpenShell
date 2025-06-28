@@ -4,6 +4,7 @@ include(CMakeFindDependencyMacro)
 
 # 查找依赖
 find_dependency(Eigen3 CONFIG REQUIRED)
+find_dependency(Boost CONFIG REQUIRED)
 find_dependency(OpenCASCADE CONFIG REQUIRED)
 
 # 引入Targets
