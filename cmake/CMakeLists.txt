@@ -344,6 +344,7 @@ endif()
 clear_wasm_sysroot()
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 restore_wasm_sysroot()
+set(BOOST_COMPONENTS ${BOOST_COMPONENTS} PARENT_SCOPE) # 生成config.cmake时需要它。
 message(STATUS "Boost include files found in ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost libraries found in ${Boost_LIBRARY_DIRS}")
 
