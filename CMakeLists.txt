@@ -30,6 +30,8 @@ set (EIGEN_DIR ${EIGEN3_INCLUDE_DIR})
 # 代理跳转到实际主项目
 add_subdirectory(cmake)
 
+install(EXPORT IfcOpenShell DESTINATION cmake NAMESPACE IfcOpenShell::)
+
 include(cmake/target_common.cmake)
 
 add_subdirectory(test/ifc_reader_test)

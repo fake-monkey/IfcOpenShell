@@ -985,6 +985,12 @@ if(BUILD_IFCGEOM)
             target_link_libraries(geometry_kernel_${kernel}_simple ${${KERNEL_UPPER}_LIBRARIES})
             list(APPEND kernel_libraries geometry_kernel_${kernel}_simple)
         endif()
+
+        install(TARGETS geometry_kernel_${kernel} EXPORT IfcOpenShell
+            ARCHIVE DESTINATION ${LIBDIR}
+            LIBRARY DESTINATION ${LIBDIR}
+            RUNTIME DESTINATION ${BINDIR}
+        )
     endforeach()
 
     # IfcGeom
@@ -998,6 +1004,12 @@ if(BUILD_IFCGEOM)
         set_target_properties(geometry_mapping_ifc${schema} PROPERTIES COMPILE_FLAGS "-DIFC_GEOM_EXPORTS -DIfcSchema=Ifc${schema}")
         target_link_libraries(geometry_mapping_ifc${schema} IfcParse)
         list(APPEND mapping_libraries geometry_mapping_ifc${schema})
+
+        install(TARGETS geometry_mapping_ifc${schema} EXPORT IfcOpenShell
+            ARCHIVE DESTINATION ${LIBDIR}
+            LIBRARY DESTINATION ${LIBDIR}
+            RUNTIME DESTINATION ${BINDIR}
+        )
     endforeach()
 
     # IfcGeom (schema agnostic)
@@ -1018,6 +1030,11 @@ if(BUILD_IFCGEOM)
         target_link_libraries(IfcGeom IfcParse ${kernel_libraries} ${mapping_libraries} ${CMAKE_THREAD_LIBS_INIT})
     endif()
 
+    install(TARGETS IfcGeom EXPORT IfcOpenShell
+        ARCHIVE DESTINATION ${LIBDIR}
+        LIBRARY DESTINATION ${LIBDIR}
+        RUNTIME DESTINATION ${BINDIR}
+    )
 endif(BUILD_IFCGEOM)
 
 if(BUILD_CONVERT OR BUILD_IFCPYTHON)
@@ -1038,6 +1055,12 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
         else()
             target_link_libraries(Serializers_ifc${schema} IfcGeom ${OPENCASCADE_LIBRARIES} ${HDF5_LIBRARIES})
         endif()
+
+        install(TARGETS Serializers_ifc${schema} EXPORT IfcOpenShell
+            ARCHIVE DESTINATION ${LIBDIR}
+            LIBRARY DESTINATION ${LIBDIR}
+            RUNTIME DESTINATION ${BINDIR}
+        )
     endforeach()
 
     add_library(Serializers ${SERIALIZERS_FILES})
@@ -1122,7 +1145,7 @@ if(BUILD_CONVERT)
         LIBRARY DESTINATION ${LIBDIR}
         RUNTIME DESTINATION ${BINDIR}
     )
-
+    
     auto_copy_dll(IfcConvert)
 endif(BUILD_CONVERT)
 
@@ -1234,6 +1257,8 @@ install(TARGETS IfcParse
 	RUNTIME DESTINATION ${BINDIR}
 )
 
+install(TARGETS IfcParse EXPORT IfcOpenShell)
+
 if(BUILD_IFCGEOM)
     # install(FILES ${IFCGEOM_H_FILES}
     #     DESTINATION ${INCLUDEDIR}/ifcgeom
@@ -1263,6 +1288,8 @@ if(BUILD_CONVERT)
         LIBRARY DESTINATION ${LIBDIR}
         RUNTIME DESTINATION ${BINDIR}
     )
+
+    install(TARGETS Serializers EXPORT IfcOpenShell)
 
     install(FILES ${SERIALIZERS_H_FILES}
         DESTINATION ${INCLUDEDIR}/serializers/
