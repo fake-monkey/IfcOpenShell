@@ -7,6 +7,8 @@ from pathlib import Path
 class IFCOpenShellRecipe(ConanFile):
     name = "ifcopenshell"
     version = "0.8.2"
+    user = "third_party"
+    channel = "develop"
 
     settings = "os", "arch"
 
@@ -24,3 +26,11 @@ class IFCOpenShellRecipe(ConanFile):
             tc.variables[pkg_name + "_DIR"] = Path(
                 path.join(self.dependencies[pkg].package_folder, "cmake")).as_posix()
         tc.generate()
+        
+    def package(self):
+        src_dir = Path(self.source_folder).parent / "build" / "package"
+        target_dir = self.package_folder
+        if path.exists(target_dir):
+            shutil.rmtree(target_dir)
+        shutil.copytree(src_dir, target_dir)
+        print(f"{src_dir} -> {target_dir}")
