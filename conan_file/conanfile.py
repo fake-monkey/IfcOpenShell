@@ -35,3 +35,7 @@ class IFCOpenShellRecipe(ConanFile):
             shutil.rmtree(target_dir)
         shutil.copytree(src_dir, target_dir)
         print(f"{src_dir} -> {target_dir}")
+
+    def package_info(self):
+        self.cpp_info.builddirs = ["cmake"]
+        self.cpp_info.set_property("cmake_find_mode", "none")
