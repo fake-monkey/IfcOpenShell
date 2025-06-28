@@ -2,6 +2,8 @@
 
 include(CMakeFindDependencyMacro)
 
+set(WASM_BUILD OFF)
+set(USE_MMAP OFF)
 if(WASM_BUILD)
     set(BOOST_COMPONENTS)
 else()
@@ -18,6 +20,8 @@ if(USE_MMAP)
         set(BOOST_COMPONENTS ${BOOST_COMPONENTS} iostreams)
     endif()
 endif()
+unset(WASM_BUILD)
+unset(USE_MMAP)
 
 # 查找依赖
 set(Boost_USE_STATIC_LIBS OFF)
