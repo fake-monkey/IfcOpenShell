@@ -373,11 +373,17 @@ if(BUILD_IFCGEOM)
 
     set(OPENCASCADE_LIBRARY_NAMES
         TKernel TKMath TKBRep TKGeomBase TKGeomAlgo TKG3d TKG2d TKShHealing TKTopAlgo TKMesh TKPrim TKBool TKBO
-        TKFillet TKSTEP TKSTEPBase TKSTEPAttr TKXSBase TKSTEP209 TKIGES TKOffset TKHLR
+        TKFillet TKXSBase TKOffset TKHLR
 
         # @todo investigate the exact conditions when this is necessary
         TKBin
     )
+
+    if(OCC_VERSION_STRING VERSION_LESS 7.8.0)
+        list(APPEND OPENCASCADE_LIBRARY_NAMES  TKIGES TKSTEPBase TKSTEPAttr TKSTEP209 TKSTEP)
+    else(OCC_VERSION_STRING VERSION_LESS 7.8.0)
+        list(APPEND OPENCASCADE_LIBRARY_NAMES TKDESTEP TKDEIGES)
+    endif(OCC_VERSION_STRING VERSION_LESS 7.8.0)
 
     if("${OCC_LIBRARY_DIR}" STREQUAL "")
         find_library(OCC_LIBRARY TKernel
@@ -750,7 +756,8 @@ if(NOT SCHEMA_VERSIONS)
         # super arbitrarily try to keep size down at least a little bit
         set(SCHEMA_VERSIONS "2x3" "4")
     else()
-        set(SCHEMA_VERSIONS "2x3" "4" "4x1" "4x2" "4x3_rc1" "4x3_rc2" "4x3_rc3" "4x3_rc4" "4x3" "4x3_tc1" "4x3_add1" "4x3_add2")
+        # set(SCHEMA_VERSIONS "2x3" "4" "4x1" "4x2" "4x3_rc1" "4x3_rc2" "4x3_rc3" "4x3_rc4" "4x3" "4x3_tc1" "4x3_add1" "4x3_add2")
+        set(SCHEMA_VERSIONS "2x3" "4") # 临时减少编译的内容。
     endif()
 endif()
 
@@ -979,6 +986,7 @@ if(BUILD_CONVERT)
     add_executable(IfcConvert ${IFCCONVERT_FILES})
 
     target_link_libraries(IfcConvert ${IFCOPENSHELL_LIBRARIES} ${OPENCASCADE_LIBRARIES} ${Boost_LIBRARIES} ${HDF5_LIBRARIES} ${USD_LIBRARIES})
+    #target_link_directories(IfcConvert PRIVATE ${OCC_LIBRARY_DIR})
 
     if((NOT WIN32) AND BUILD_SHARED_LIBS)
         # Only set RPATHs when building shared libraries (i.e. IfcParse and

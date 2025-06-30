@@ -27,6 +27,10 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 find_package(Eigen3 CONFIG REQUIRED)
 set (EIGEN_DIR ${EIGEN3_INCLUDE_DIR})
 
+if (MSVC)
+    add_compile_options(/MP)
+endif()
+
 # 代理跳转到实际主项目
 add_subdirectory(cmake)
 

@@ -18,7 +18,8 @@
             "WITH_CGAL": "OFF",
             "COLLADA_SUPPORT": "OFF",
             "HDF5_SUPPORT": "OFF",
-            "IFCXML_SUPPORT": "OFF"
+            "IFCXML_SUPPORT": "OFF",
+            "OCC_VERSION_STRING": "7.8.0"
           },
             "vendor": {
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
