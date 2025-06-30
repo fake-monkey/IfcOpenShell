@@ -2,17 +2,17 @@
 cmake_minimum_required(VERSION 3.20)
 project(IfcOpenShellWrapper)
 
-set (CONAN_FILE_DIR ${CMAKE_SOURCE_DIR}/conan_file)
-if (EXISTS ${CONAN_FILE_DIR}/conanfile.py)
+set (CONAN_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build/generators)
+if (EXISTS ${CMAKE_SOURCE_DIR}/conanfile.py)
     execute_process(
-        COMMAND conan install ${CONAN_FILE_DIR} --output=${CMAKE_SOURCE_DIR}/build/generators --build=never -r=fscut-conan-center --update
+        COMMAND conan install ${CMAKE_SOURCE_DIR} --output=${CONAN_OUTPUT_DIR} --build=never -r=fscut-conan-center --update
         RESULT_VARIABLE result
     )
     if(result)
         message(FATAL_ERROR "Failed to execute conan install command")
     endif()
-
-    include(${CMAKE_SOURCE_DIR}/build/generators/conan_toolchain.cmake)
+    
+    include(${CONAN_OUTPUT_DIR}/conan_toolchain.cmake)
 endif()
 
 find_package(OpenCASCADE CONFIG REQUIRED)
