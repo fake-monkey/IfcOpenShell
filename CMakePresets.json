@@ -1,0 +1,76 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "VS2022_x64-Base",
+            "hidden": true,
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+          "cacheVariables": {
+            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/package",
+            "CMAKE_GENERATOR": "Visual Studio 17 2022",
+            "CMAKE_GENERATOR_PLATFORM": "x64",
+            "MINIMAL_BUILD": "ON",
+            "BUILD_EXAMPLES": "OFF",
+            "WITH_CGAL": "OFF",
+            "COLLADA_SUPPORT": "OFF",
+            "HDF5_SUPPORT": "OFF",
+            "IFCXML_SUPPORT": "OFF"
+          },
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                    "clangTidyChecks": "-format-style='file'",
+                    "enableMicrosoftCodeAnalysis": true,
+                    "enableClangTidyCodeAnalysis": true
+                }
+            }
+        },
+        {
+            "name": "VS2022_x64-Debug",
+            "inherits": "VS2022_x64-Base",
+            "binaryDir": "${sourceDir}/build/Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CONFIGURATION_TYPES": "Debug"
+            }
+        },
+        {
+            "name": "VS2022_x64-Release",
+            "inherits": "VS2022_x64-Base",
+            "binaryDir": "${sourceDir}/build/Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CONFIGURATION_TYPES": "Release"
+            }
+        },
+        {
+            "name": "VS2022_x64-RelWithDebInfo",
+            "inherits": "VS2022_x64-Base",
+            "binaryDir": "${sourceDir}/build/RelWithDebInfo",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_CONFIGURATION_TYPES": "RelWithDebInfo"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Debug",
+            "configurePreset": "VS2022_x64-Debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Release",
+            "configurePreset": "VS2022_x64-Release",
+            "configuration": "Release"
+        },
+        {
+            "name": "RelWithDebInfo",
+            "configurePreset": "VS2022_x64-RelWithDebInfo",
+            "configuration": "RelWithDebInfo"
+        }
+    ]
+}

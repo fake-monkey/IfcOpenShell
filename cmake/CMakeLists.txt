@@ -98,25 +98,22 @@ include(GNUInstallDirs)
 # Specify paths to install files
 if(NOT BINDIR)
     set(BINDIR bin)
-endif()
-if(NOT IS_ABSOLUTE ${BINDIR})
-    set(BINDIR ${CMAKE_INSTALL_BINDIR})
+    if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        set(BINDIR ${BINDIR}d)
+    endif()
 endif()
 message(STATUS "BINDIR: ${BINDIR}")
 
 if(NOT INCLUDEDIR)
     set(INCLUDEDIR include)
 endif()
-if(NOT IS_ABSOLUTE ${INCLUDEDIR})
-    set(INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR})
-endif()
 message(STATUS "INCLUDEDIR: ${INCLUDEDIR}")
 
 if(NOT LIBDIR)
     set(LIBDIR lib)
-endif()
-if(NOT IS_ABSOLUTE ${LIBDIR})
-    set(LIBDIR ${CMAKE_INSTALL_LIBDIR})
+    if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        set(LIBDIR ${LIBDIR}d)
+    endif()
 endif()
 message(STATUS "LIBDIR: ${LIBDIR}")
 
@@ -252,7 +249,7 @@ endmacro()
 # Find Boost: On win32 the (hardcoded) default is to use static libraries and
 # runtime, when doing running conda-build we pick what conda prepared for us.
 if(WIN32 AND("$ENV{CONDA_BUILD}" STREQUAL ""))
-    set(Boost_USE_STATIC_LIBS ON)
+    set(Boost_USE_STATIC_LIBS OFF)
     set(Boost_USE_STATIC_RUNTIME OFF)
     set(Boost_USE_MULTITHREADED ON)
 
@@ -263,7 +260,7 @@ if(WIN32 AND("$ENV{CONDA_BUILD}" STREQUAL ""))
         add_definitions(-DBOOST_ALL_NO_LIB)
 
         # Necessary for boost version >= 1.67
-        set(BCRYPT_LIBRARIES "bcrypt.lib")
+        set(BCRYPT_LIBRARIES "bcrypt")
     endif()
 else()
     # Disable Boost's autolinking as the libraries to be linked to are supplied
@@ -273,7 +270,7 @@ else()
 
     if(WIN32)
         # Necessary for boost version >= 1.67
-        set(BCRYPT_LIBRARIES "bcrypt.lib")
+        set(BCRYPT_LIBRARIES "bcrypt")
     endif()
 endif()
 
@@ -297,6 +294,7 @@ if(USE_MMAP)
 endif()
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+set(BOOST_COMPONENTS ${BOOST_COMPONENTS} PARENT_SCOPE) # 生成config.cmake时需要它。
 message(STATUS "Boost include files found in ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost libraries found in ${Boost_LIBRARY_DIRS}")
 
@@ -411,19 +409,20 @@ if(BUILD_IFCGEOM)
     # TODO Extract this into macro/function
     foreach(lib ${OPENCASCADE_LIBRARY_NAMES})
         # Make sure we'll handle the Windows/MSVC debug postfix convention too.
-        string(REPLACE TKerneld "${lib}" lib_path "${libTKernel}")
-        string(REPLACE TKernel "${lib}" lib_path "${lib_path}")
-        list(APPEND OPENCASCADE_LIBRARIES "${lib_path}")
+        # 完全用 target 管理依赖。
+        # string(REPLACE TKerneld "${lib}" lib_path "${libTKernel}")
+        # string(REPLACE TKernel "${lib}" lib_path "${lib_path}")
+        list(APPEND OPENCASCADE_LIBRARIES "${lib}")
     endforeach()
 
     if(MSVC)
         add_definitions(-DHAVE_NO_DLL)
-        add_debug_variants(OPENCASCADE_LIBRARIES "${OPENCASCADE_LIBRARIES}" d)
+        # add_debug_variants(OPENCASCADE_LIBRARIES "${OPENCASCADE_LIBRARIES}" d)
     endif()
 
     if(WIN32)
         # OCC might require linking to Winsock depending on the version and build configuration
-        list(APPEND OPENCASCADE_LIBRARIES ws2_32.lib)
+        list(APPEND OPENCASCADE_LIBRARIES ws2_32)
     endif()
 
     # Make sure cross-referenced symbols between static OCC libraries get
@@ -883,12 +882,23 @@ set(IFCPARSE_FILES ${IFCPARSE_CPP_FILES} ${IFCPARSE_H_FILES})
 
 add_library(IfcParse ${IFCPARSE_FILES})
 set_target_properties(IfcParse PROPERTIES COMPILE_FLAGS -DIFC_PARSE_EXPORTS VERSION "${PROJECT_VERSION}" SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+target_include_directories(IfcParse
+PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../src/ifcparse>
+    $<INSTALL_INTERFACE:include/ifcparse>
+)
 
 if (WASM_BUILD)
     target_link_libraries(IfcParse ${BCRYPT_LIBRARIES} ${LIBXML2_LIBRARIES})
 else()
     target_link_libraries(IfcParse ${Boost_LIBRARIES} ${BCRYPT_LIBRARIES} ${LIBXML2_LIBRARIES})
 endif()
+
+install(TARGETS IfcParse EXPORT IfcOpenShell
+	ARCHIVE DESTINATION ${LIBDIR}
+	LIBRARY DESTINATION ${LIBDIR}
+	RUNTIME DESTINATION ${BINDIR}
+)
 
 if(BUILD_IFCGEOM)
     # IfcGeom
@@ -921,7 +931,6 @@ if(BUILD_IFCGEOM)
     else()
         target_link_libraries(IfcGeom IfcParse ${IFCGEOM_SCHEMA_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
     endif()
-
 endif(BUILD_IFCGEOM)
 
 if(BUILD_CONVERT OR BUILD_IFCPYTHON)
@@ -960,6 +969,8 @@ if(BUILD_CONVERT OR BUILD_IFCPYTHON)
 
 endif(BUILD_CONVERT OR BUILD_IFCPYTHON)
 
+include (dll_replicator.cmake)
+
 if(BUILD_CONVERT)
     # IfcConvert
     file(GLOB IFCCONVERT_CPP_FILES ../src/ifcconvert/*.cpp)
@@ -981,6 +992,8 @@ if(BUILD_CONVERT)
         LIBRARY DESTINATION ${LIBDIR}
         RUNTIME DESTINATION ${BINDIR}
     )
+    
+    auto_copy_dll(IfcConvert)
 endif(BUILD_CONVERT)
 
 # IfcGeomServer
@@ -1066,12 +1079,6 @@ install(FILES ${IFCPARSE_H_FILES}
 	DESTINATION ${INCLUDEDIR}/ifcparse
 )
 
-install(TARGETS IfcParse
-	ARCHIVE DESTINATION ${LIBDIR}
-	LIBRARY DESTINATION ${LIBDIR}
-	RUNTIME DESTINATION ${BINDIR}
-)
-
 if(BUILD_IFCGEOM)
     install(FILES ${IFCGEOM_H_FILES}
         DESTINATION ${INCLUDEDIR}/ifcgeom
@@ -1081,7 +1088,7 @@ if(BUILD_IFCGEOM)
         DESTINATION ${INCLUDEDIR}/ifcgeom_schema_agnostic
     )
 
-    install(TARGETS ${IFCGEOM_SCHEMA_LIBRARIES} IfcGeom
+    install(TARGETS ${IFCGEOM_SCHEMA_LIBRARIES} IfcGeom EXPORT IfcOpenShell
         ARCHIVE DESTINATION ${LIBDIR}
         LIBRARY DESTINATION ${LIBDIR}
         RUNTIME DESTINATION ${BINDIR}
