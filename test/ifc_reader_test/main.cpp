@@ -1,15 +1,16 @@
-#include <filesystem>
-#include <thread>
-#include <vector>
-#include <format>
+#include "../ifcgeom/Iterator.h"
+#include "../ifcgeom/kernels/opencascade/OpenCascadeConversionResult.h"
+#include "../ifcparse/Ifc2x3.h"
+#include "../ifcparse/Ifc4.h"
+#include "../ifcparse/IfcFile.h"
 
+#include <filesystem>
+#include <format>
+#include <thread>
 #include <TopoDS_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopoDS_Shape.hxx>
-
-#include "../ifcgeom/Iterator.h"
-#include "../ifcgeom/kernels/opencascade/OpenCascadeConversionResult.h"
-#include "../ifcparse/IfcFile.h"
+#include <vector>
 
 enum class IfcParseError {
     kIfcInitializationFailed,
@@ -20,6 +21,16 @@ enum class IfcParseError {
 static std::string get_native_string(const std::filesystem::path& a_path) {
     auto u8str = a_path.u8string();
     return std::string(reinterpret_cast<const char*>(u8str.data()), u8str.size());
+}
+
+static std::optional<int> GetComponentCount(IfcParse::IfcFile& a_file) {
+    if (auto product_2x3 = a_file.instances_by_type<Ifc2x3::IfcProduct>()) {
+        return product_2x3->size();
+    } else if (auto product_4 = a_file.instances_by_type<Ifc4::IfcProduct>()) {
+        return product_4->size();
+    } else {
+        return std::nullopt;
+    }
 }
 
 std::variant<std::vector<TopoDS_Shape>, IfcParseError> ReadIFCShapes(const std::filesystem::path& a_path, int a_num_threads, const std::set<std::string>& a_exclude_entities) {
@@ -33,6 +44,8 @@ std::variant<std::vector<TopoDS_Shape>, IfcParseError> ReadIFCShapes(const std::
         if (!(bool)ifc_file || !ifc_file->good()) {
             return IfcParseError::kIfcInitializationFailed;
         }
+
+        auto count_model = GetComponentCount(*ifc_file);
 
         std::string geometry_kernel = "opencascade";
         geometry::Settings geometry_settings;
@@ -81,21 +94,20 @@ std::variant<std::vector<TopoDS_Shape>, IfcParseError> ReadIFCShapes(const std::
             }
         }
         return result;
-    }
-    catch(...) {
+    } catch (...) {
         return IfcParseError::kIfcParsingException;
     }
 }
 
 int main() {
     using namespace std;
-    
+
     std::locale::global(std::locale("zh_CN.UTF-8"));
 
     filesystem::path ifc_dir = LR"(D:\works\tasks\BUGFIX#78415-BUGFIX#78907-ifc导入错误)";
     //ifc_dir = LR"(D:\works\tasks\BUGFIX#96486-ifc导入模型错误)";
     std::string file_name = "2A5-ZB2 33m(1-7.23.25)-A";
-    file_name = "过焊孔";
+    file_name = "3-21";
     filesystem::path ifc_path = ifc_dir / (file_name + ".ifc");
     uint32_t n = std::thread::hardware_concurrency();
     if (n == 0) {
