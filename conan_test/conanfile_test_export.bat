@@ -9,6 +9,7 @@ call %~dp0cmake_configure.bat Release
 cmake --build --preset Release -j %NUMBER_OF_PROCESSORS%
 cmake --install build\Release --config Release
 pushd build\package\
+del /q ..\ifcopenshell.zip
 7z a ..\ifcopenshell.zip *
 popd
 copy conanfile.py build\package\ /Y
