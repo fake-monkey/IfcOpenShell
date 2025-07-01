@@ -2,10 +2,10 @@ setlocal
 
 cd /d %~dp0..\
 rmdir /s /q build\package
-cmake . --preset VS2022_x64-Debug
+call %~dp0conan_configure.bat Debug
 cmake --build --preset Debug -j %NUMBER_OF_PROCESSORS%
 cmake --install build\Debug --config Debug
-cmake . --preset VS2022_x64-Release
+call %~dp0conan_configure.bat Release
 cmake --build --preset Release -j %NUMBER_OF_PROCESSORS%
 cmake --install build\Release --config Release
 pushd build\package\
@@ -15,4 +15,5 @@ copy conanfile.py build\package\ /Y
 conan export-pkg build\package -of build\conan_export
 
 endlocal
-pause
+REM If double-click to run, pause
+echo %cmdcmdline% | find /i "%~nx0" >nul && pause
