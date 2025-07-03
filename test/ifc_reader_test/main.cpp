@@ -55,9 +55,6 @@ std::variant<std::vector<TopoDS_Shape>, IfcParseError> ReadIFCShapes(const std::
         geometry_settings.get<settings::UseWorldCoords>().value = true;
         geometry_settings.get<settings::IteratorOutput>().value = settings::NATIVE;
 
-        // 采用文件中单位进行转化。
-        geometry_settings.get<settings::ConvertBackUnits>().value = true;
-
         IfcGeom::entity_filter entity_filter;
         entity_filter.include = false;
         entity_filter.traverse = true;
@@ -84,8 +81,12 @@ std::variant<std::vector<TopoDS_Shape>, IfcParseError> ReadIFCShapes(const std::
             IfcGeom::Element* geom_object = context_iterator->get();
             if (geom_object != nullptr) {
                 auto* o = static_cast<const IfcGeom::BRepElement*>(geom_object);
-                std::unique_ptr<IfcGeom::ConversionResultShape> itm(o->geometry().as_compound());
+                std::unique_ptr<IfcGeom::ConversionResultShape> itm(o->geometry().as_compound(true));
                 TopoDS_Shape compound = ((geometry::OpenCascadeShape*)itm.get())->shape();
+                // IFC 导入的图形统一转化为以米为单位。
+                gp_Trsf scale;
+                scale.SetScaleFactor(1000);
+                compound.Move(scale, false);
                 result.push_back(compound);
             }
 
@@ -105,9 +106,8 @@ int main() {
     std::locale::global(std::locale("zh_CN.UTF-8"));
 
     filesystem::path ifc_dir = LR"(D:\works\tasks\BUGFIX#78415-BUGFIX#78907-ifc导入错误)";
-    //ifc_dir = LR"(D:\works\tasks\BUGFIX#96486-ifc导入模型错误)";
-    std::string file_name = "2A5-ZB2 33m(1-7.23.25)-A";
-    file_name = "3-21";
+    ifc_dir = LR"(D:\works\tasks\BUGFIX#78415-BUGFIX#78907-ifc导入错误\加载失败)";
+    std::string file_name = "过焊孔";
     filesystem::path ifc_path = ifc_dir / (file_name + ".ifc");
     uint32_t n = std::thread::hardware_concurrency();
     if (n == 0) {
