@@ -4,14 +4,15 @@
 #include "../ifcparse/Ifc4.h"
 #include "../ifcparse/IfcFile.h"
 
+#include <BRepBuilderAPI_Transform.hxx>
 #include <filesystem>
 #include <format>
+#include <Interface_Static.hxx>
 #include <ranges>
 #include <STEPControl_Writer.hxx>
 #include <thread>
 #include <TopoDS_Builder.hxx>
 #include <TopoDS_Compound.hxx>
-#include <BRepBuilderAPI_Transform.hxx>
 #include <TopoDS_Shape.hxx>
 #include <vector>
 
@@ -67,10 +68,10 @@ void SetDefaultOption(ifcopenshell::geometry::Settings& a_setting) {
 }
 
 // 返回类型为 std::variant，包含成功的形状向量或错误代码
-static std::variant<std::vector<TopoDS_Shape>, IfcParseError> ReadIFCShapes(std::istream& a_stream,
-                                                                            std::streamsize a_length,
-                                                                            unsigned int a_num_threads,
-                                                                            const std::set<std::string>& a_exclude_entities) {
+static std::variant<std::vector<std::tuple<int, TopoDS_Shape>>, IfcParseError> ReadIFCShapes(std::istream& a_stream,
+                                                                                             std::streamsize a_length,
+                                                                                             unsigned int a_num_threads,
+                                                                                             const std::set<std::string>& a_exclude_entities) {
     try {
         using namespace ifcopenshell;
         using namespace ifcopenshell::geometry;
@@ -132,11 +133,14 @@ static std::variant<std::vector<TopoDS_Shape>, IfcParseError> ReadIFCShapes(std:
                 auto* o = static_cast<const IfcGeom::BRepElement*>(geom_object);
                 std::unique_ptr<IfcGeom::ConversionResultShape> itm(o->geometry().as_compound(true));
                 TopoDS_Shape compound = ((geometry::OpenCascadeShape*)itm.get())->shape();
-                //ShapeHandle::CreateSolidsFromSingleShape(compound, 1e-3, true);
-                gp_Trsf scale_trsf;
-                scale_trsf.SetScaleFactor(1000);
-                compound = ApplyTransformation(compound, scale_trsf);
-                result.push_back({id, compound});
+                //if (o->id() == 62)
+                {
+                    //ShapeHandle::CreateSolidsFromSingleShape(compound, 1e-3, true);
+                    gp_Trsf scale_trsf;
+                    scale_trsf.SetScaleFactor(1000);
+                    compound = ApplyTransformation(compound, scale_trsf);
+                    result.push_back({id, compound});
+                }
             }
 
             cur_size++;
@@ -149,10 +153,13 @@ static std::variant<std::vector<TopoDS_Shape>, IfcParseError> ReadIFCShapes(std:
                 return std::get<0>(a_pair);
             });
         }
+        return result;
+        /*
         return ranges_handle::ConvertToVector(result | std::views::transform(
                                                            [](const auto& a_pair) {
                                                                return std::get<1>(a_pair);
                                                            }));
+        */
     } catch (...) {
         return IfcParseError::kIfcParsingException;
     }
@@ -164,8 +171,8 @@ int main() {
     std::locale::global(std::locale("zh_CN.UTF-8"));
 
     filesystem::path ifc_dir = LR"(D:\works\tasks\BUGFIX#78415-BUGFIX#78907-ifc导入错误)";
-    ifc_dir = LR"(D:\Users\liuxin\Documents\WXWork\1688857048427176\Cache\File\2025-07\鸿路工件模型(1)(1)\鸿路工件模型)";
-    std::string file_name = "gl2-2";
+    ifc_dir = LR"(D:\works\tasks\BUGFIX#78415-BUGFIX#78907-ifc导入错误\读取模型错误)";
+    std::string file_name = "1GLF14-2(1)";
     filesystem::path ifc_path = ifc_dir / (file_name + ".ifc");
     uint32_t n = std::thread::hardware_concurrency();
     if (n == 0) {
@@ -183,10 +190,11 @@ int main() {
     std::set<std::string> exclude_entities = {"IFCMECHANICALFASTENER", "IFCFASTENER"}; // Example of entities to exclude
     auto res = ReadIFCShapes(*file_stream, length, n, exclude_entities);
 
-    if (auto* shapes = std::get_if<std::vector<TopoDS_Shape>>(&res)) {
+    if (auto* shapes = std::get_if<std::vector<std::tuple<int, TopoDS_Shape>>>(&res)) {
 
         STEPControl_Writer writer;
-        for (const auto& shape : *shapes) {
+        for (const auto& [id, shape] : *shapes) {
+            Interface_Static::SetCVal("write.step.product.name", std::format("{}", id).c_str());
             writer.Transfer(shape, STEPControl_AsIs);
         }
 
